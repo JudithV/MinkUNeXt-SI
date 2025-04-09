@@ -1,0 +1,83 @@
+dataset_folder: '/media/arvc/HDD4TB1/Judith/MinkUNeXt-main' # '/home/arvc/Judith/MinkUNeXt-main'
+cuda_device: 'cuda:0' # 'cuda:0' or 'cuda:1'
+
+quantization_size: [0.1,2.0,1.875]  # esfericas: [0.1,2.0,1.875] [m,deg,deg]; cartesianas: 0.01 [m,m,m]
+num_workers: 4 
+batch_size: 2048 #128 / --> 2048
+batch_size_limit: 2048  #128 / --> 2048
+batch_expansion_rate: 1.4 # Null
+batch_expansion_th: 0.7 # Null
+batch_split_size: 16 #32
+val_batch_size: 16 # 32
+
+format_point_cloud: 'bin' #'bin' | 'csv'
+
+spherical_coords: True
+use_intensity: True
+process_intensity: False
+equalize_intensity: True
+min_distance: 2
+max_distance: 60
+
+optimizer: 'Adam' # Adam or AdamW
+initial_lr: 0.001
+scheduler: 'MultiStepLR' # MultiStepLR or CosineAnnealingLR or Null
+aug_mode: 1 # 1 if yes
+weight_decay: 0.0001
+loss: 'TruncatedSmoothAP' #'TruncatedSmoothAP' or 'BatchHardTripletMarginLoss'
+margin: Null
+tau1: 0.01
+positives_per_query: 4
+similarity: 'euclidean' # 'cosine' or 'euclidean'
+normalize_embeddings: False
+
+protocol: 'nclt'
+baseline:
+  epochs: 400
+  scheduler_milestones: [250, 350]
+  num_points: 4096
+  train_file: training_queries_baseline_pruebas.pickle
+  val_file: test_queries_baseline_pruebas.pickle
+
+refined:
+  epochs: 500
+  scheduler_milestones: [350, 450]
+  num_points: 4096
+  train_file: training_queries_refine_pruebas.pickle
+  val_file: test_queries_baseline_pruebas.pickle
+
+arvc:
+  epochs: 200
+  scheduler_milestones: [50, 150]
+  num_points: 23000
+  train_file: training_queries_arvc_pruebas.pickle
+  val_file: test_queries_arvc_pruebas.pickle
+
+nclt:
+  epochs: 400
+  scheduler_milestones: [250, 350]
+  train_file: training_queries_nclt_pruebas.pickle
+  val_file: test_queries_nclt_pruebas.pickle
+
+
+intensityOxford:
+  epochs: 400 # 400
+  scheduler_milestones: [250, 350] # [250, 350]
+  num_points: 4096
+  train_file: intensityOxford_training_queries.pickle
+  val_file: intensityOxford_test_queries.pickle
+
+usyd:
+  epochs: 400 # 40 / 400
+  scheduler_milestones: [250, 350] #[30] / [250, 350]
+  num_points: 23000
+  train_file: usyd_training_queries.pickle
+  val_file: usyd_test_queries.pickle
+
+print:
+  model_info: True
+  number_of_parameters: True
+  debug: False
+
+evaluate:
+  weights_path: '/media/arvc/HDD4TB1/Judith/MinkUNeXt-main/weights/MinkUNeXt_usyd_20250218_0857_final.pth'
