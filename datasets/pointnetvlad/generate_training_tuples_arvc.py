@@ -1,4 +1,5 @@
-# PointNetVLAD datasets: based on Oxford RobotCar and Inhouse
+# Judith Vilella-Cantos. Miguel Hernández University of Elche.
+# Create train and test sets for the ARVC dataset (https://arvc.umh.es/db/databases/)
 # Code adapted from PointNetVLAD repo: https://github.com/mikacuy/pointnetvlad
 
 import csv
@@ -239,5 +240,5 @@ if __name__ == '__main__':
     print("Number of training submaps: " + str(len(df_train['file'])))
     print("Number of non-disjoint test submaps: " + str(len(df_test['file'])))
     # ind_nn_r is a threshold for positive elements - 10 is in original PointNetVLAD code for refined dataset
-    construct_query_dict(df_train, base_path, "training_queries_arvc_pruebas.pickle", ind_nn_r=5)
-    construct_query_dict(df_test, base_path, "test_queries_arvc_pruebas.pickle", ind_nn_r=5)
+    construct_query_dict(df_train, base_path, "training_queries_arvc.pickle", ind_nn_r=5)
+    construct_query_dict(df_test, base_path, "test_queries_arvc.pickle", ind_nn_r=5)
