@@ -1,4 +1,5 @@
-# PointNetVLAD datasets: based on Oxford RobotCar and Inhouse
+# Judith Vilella-Cantos. Miguel Hernández University of Elche.
+# Create train and test sets for the NCLT datasets.
 # Code adapted from PointNetVLAD repo: https://github.com/mikacuy/pointnetvlad
 
 import numpy as np
