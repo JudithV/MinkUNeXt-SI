@@ -1,4 +1,6 @@
-# PointNetVLAD datasets: based on Oxford RobotCar and Inhouse
+# Judith Vilella-Cantos. Miguel Hernández University of Elche.
+# Create validation database and queries for all the datasets.
+# Code for USyd and IntensityOxford is separated in their respective files.
 # Code adapted from PointNetVLAD repo: https://github.com/mikacuy/pointnetvlad
 
 import numpy as np
@@ -15,12 +17,9 @@ parent_dir = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(parent_dir)
 from config import PARAMS
 
-# For training and test data splits, ARVC = 10, BLT = 13, VMD = 23, NCLT = 100, Oxford = 150
-X_WIDTH = 23
-Y_WIDTH = 23
-
-"""X_WIDTH = 150 
-Y_WIDTH = 150"""
+# For training and test data splits, ARVC = 10,  NCLT = 100, Oxford = 150
+X_WIDTH = 10
+Y_WIDTH = 10
 
 # For Oxford
 P1 = [5735712.768124, 620084.402381]
@@ -45,16 +44,6 @@ P13 = [702388.3360408501, 4238945.463840115]
 P14 = [702413.545255068, 4238913.822592095] # 38.275482714486884, -0.6860005510446198
 P15 = [702437.4984199596, 4238914.70657325] # 38.275485275281, -0.685726671171021
 
-# BLT
-#KTIMA
-P16 = [663182.204586871, 4479512.96605084]
-P17 = [663141.686467221, 4479464.873340834]
-P18 = [663116.3699656122, 4479498.777999125]
-
-#RISEHOLME
-P19 = [665082.1563399071, 5904963.1919269]
-P20 = [665100.1582773875, 5904972.71202409]
-
 # NCLT
 P21 = [276617.85459597525, 4685889.601471452]
 P22 = [276385.4404570175, 4685737.3182648895]
@@ -62,17 +51,8 @@ P23 = [275855.947086381, 4685987.118303991]
 P24 = [275830.45268349943, 4685272.447089739]
 P25 = [275834.0886877172, 4685718.746155128]
 
-# VMD
-P26 = [405156.7520412804, 5025041.790304738]
-#P27 = [405107.0985735883, 5025050.372015398]
-P28 = [405154.7637688267, 5025158.401943873]
-
-P27 = [405104.76748520625, 5025096.011784253]
-#P28 = [405178.6821447582, 5025143.267948912]
-
 P_DICT = {"oxford": [P1, P2, P3, P4], "university": [P5, P6, P7], "residential": [P8, P9, P10], "business": [],
-          "arvc": [P12,P13, P14, P15], "blt-ktima": [P16, P17, P18], "blt-riseholme": [P19, P20], 
-          "nclt": [P21, P22, P23, P24], "vmd": [P26, P27, P28]}
+          "arvc": [P12,P13, P14, P15],  "nclt": [P21, P22, P23, P24]}
 
 
 def check_in_test_set(northing, easting, points):
@@ -108,18 +88,13 @@ def construct_query_and_database_sets(base_path, runs_folder, folders, pointclou
             # entire business district is in the test set
             if output_name == "business":
                 df_test = df_test.append(row, ignore_index=True)
-            #elif check_in_test_set(row['northing'], row['easting'], p):
-                #df_test = df_test.append(row, ignore_index=True)
-                #df_test = pd.concat([df_test, pd.DataFrame([row])], ignore_index=True)
-            elif "run2" in folder:
+            elif check_in_test_set(row['northing'], row['easting'], p):
                 df_test = df_test.append(row, ignore_index=True)
-            """if ind == (len(all_folders) - 1):
-                df_test = df_test.append(row, ignore_index=True)"""
+                df_test = pd.concat([df_test, pd.DataFrame([row])], ignore_index=True)
+
             df_database = df_database.append(row, ignore_index=True)
-            #df_database = pd.concat([df_database, pd.DataFrame([row])], ignore_index=True)
         database_tree = KDTree(df_database[['northing', 'easting']])
         database_trees.append(database_tree)
-        #if ind == (len(all_folders) - 1):
         if not df_test.empty:
             test_tree = KDTree(df_test[['northing', 'easting']])
             test_trees.append(test_tree)
@@ -133,7 +108,7 @@ def construct_query_and_database_sets(base_path, runs_folder, folders, pointclou
         database = {}
         test = {}
         df_locations = pd.read_csv(os.path.join(base_path, runs_folder, folder, filename), sep=',')
-        if output_name == 'blt' or output_name == 'arvc' or output_name == 'vmd':
+        if output_name == 'arvc':
             df_locations['timestamp'] = runs_folder + folder + pointcloud_fols + df_locations['timestamp'].astype(str) + '.csv' 
         else:
             df_locations['timestamp'] = runs_folder + folder + pointcloud_fols + df_locations['timestamp'].astype(str) + '.bin' 
@@ -142,16 +117,11 @@ def construct_query_and_database_sets(base_path, runs_folder, folders, pointclou
             # entire business district is in the test set
             if output_name == "business":
                 test[len(test.keys())] = {'query': row['file'], 'northing': row['northing'], 'easting': row['easting']}
-            #elif check_in_test_set(row['northing'], row['easting'], p):
-                #test[len(test.keys())] = {'query': row['file'], 'northing': row['northing'], 'easting': row['easting']}
-            elif "run2" in row['file']:
+            elif check_in_test_set(row['northing'], row['easting'], p):
                 test[len(test.keys())] = {'query': row['file'], 'northing': row['northing'], 'easting': row['easting']}
-            """if ind == (len(all_folders) - 1):
-                test[len(test.keys())] = {'query': row['file'], 'northing': row['northing'], 'easting': row['easting']}"""
             database[len(database.keys())] = {'query': row['file'], 'northing': row['northing'],
                                               'easting': row['easting']}
         database_sets.append(database)
-        #if ind == (len(all_folders) - 1):
         if len(test) > 0:
             test_sets.append(test)
         ind += 1
@@ -163,7 +133,7 @@ def construct_query_and_database_sets(base_path, runs_folder, folders, pointclou
                 continue
             for key in range(len(test_sets[j].keys())):
                 coor = np.array([[test_sets[j][key]["northing"], test_sets[j][key]["easting"]]])
-                index = tree.query_radius(coor, r=5) # ARVC, VMD or BLT -> r = 5, NCLT or Baseline/Refined -> r = 25
+                index = tree.query_radius(coor, r=5) # ARVC -> r = 5, NCLT or Baseline/Refined -> r = 25
                 # indices of the positive matches in database i of each query (key) in test set j
                 test_sets[j][key][i] = index[0].tolist()
 
@@ -176,7 +146,7 @@ if __name__ == '__main__':
     base_path = PARAMS.dataset_folder
 
     # For Oxford
-    """folders = []
+    folders = []
     runs_folder = "oxford/"
     all_folders = sorted(os.listdir(os.path.join(base_path, runs_folder)))
     index_list = [5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 22, 24, 31, 32, 33, 38, 39, 43, 44]
@@ -222,10 +192,10 @@ if __name__ == '__main__':
 
     print(folders)
     construct_query_and_database_sets(base_path, runs_folder, folders, "/pointcloud_25m_25/",
-                                      "pointcloud_centroids_25.csv", P_DICT["business"], "business")"""
+                                      "pointcloud_centroids_25.csv", P_DICT["business"], "business")
     
     # For ARVC
-    """folders = []
+    folders = []
     runs_folder = "arvc/"
     all_folders = sorted(os.listdir(os.path.join(base_path, runs_folder)))
     for ind in range(1, len(all_folders) -1):
@@ -233,29 +203,10 @@ if __name__ == '__main__':
 
     print(folders)
     construct_query_and_database_sets(base_path, runs_folder, folders, "/robot0/lidar/data/",
-                                      "data.csv", P_DICT["arvc"], "arvc")"""
-                                      
-    # For BLT
-    """folders = []
-    runs_folder = "blt/"
-    
-    # Process the two different scenarios within the dataset
-    all_folders = sorted(os.listdir(os.path.join(base_path, runs_folder + "ktima/"))) + sorted(os.listdir(os.path.join(base_path, runs_folder + "riseholme/")))
-    for folder in all_folders:
-        if os.path.exists(os.path.join(base_path, runs_folder + "ktima/" + folder)):
-            folders.append("ktima/"+folder)
-    
-    construct_query_and_database_sets(base_path, runs_folder, folders, "/robot0/lidar/data/",
-                                      "data.csv", P_DICT["blt-ktima"], "blt")
-    folders = []
-    for folder in all_folders:
-            if folder != "session0" and folder != "session1" and os.path.exists(os.path.join(base_path, runs_folder + "riseholme/" + folder)):
-                folders.append("riseholme/"+folder)
-    construct_query_and_database_sets(base_path, runs_folder, folders, "/robot0/lidar/data/",
-                                      "data.csv", P_DICT["blt-riseholme"], "blt")"""
+                                      "data.csv", P_DICT["arvc"], "arvc")
     
     # For NCLT
-    """folders = []
+    folders = []
     runs_folder = "nclt/"
     all_folders = sorted(os.listdir(os.path.join(base_path, runs_folder)))
     for idx in range(0, 3):
@@ -263,20 +214,4 @@ if __name__ == '__main__':
     folders = ["2012-03-17", "2012-05-26", "2012-06-15", "2012-08-20", "2012-09-28", "2012-10-28"]
     print(folders)
     construct_query_and_database_sets(base_path, runs_folder, folders, "/velodyne_sync/",
-                                      "data.csv", P_DICT["nclt"], "nclt")"""
-
-    # For VMD (PIC4SeR)
-    folders = []
-    runs_folder = "vmd/"
-    
-    # Process the two different scenarios within the dataset
-    all_folders = sorted(os.listdir(os.path.join(base_path, runs_folder + "pergola/"))) + sorted(os.listdir(os.path.join(base_path, runs_folder + "vineyard/")))
-    #all_folders = sorted(os.listdir(os.path.join(base_path, runs_folder + "pergola/")))
-    for folder in all_folders:
-        if os.path.exists(os.path.join(base_path, runs_folder + "pergola/" + folder)):
-            folders.append("pergola/"+folder)
-        else:
-            folders.append("vineyard/"+folder)
-    
-    construct_query_and_database_sets(base_path, runs_folder, folders, "/pointcloud/lidar3d_1/",
-                                      "data.csv", P_DICT["vmd"], "vmd")
+                                      "data.csv", P_DICT["nclt"], "nclt")
