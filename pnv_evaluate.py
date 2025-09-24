@@ -1,5 +1,7 @@
+# Judith Vilella Cantos. Miguel Hernández University of Elche.
 # Evaluation using PointNetVLAD evaluation protocol and test sets
 # Evaluation code adapted from PointNetVlad code: https://github.com/mikacuy/pointnetvlad
+# In this modification, evaluation with a sequence from the Kitti dataset is also considered, as exposed in our work.
 
 from sklearn.neighbors import KDTree
 import numpy as np
