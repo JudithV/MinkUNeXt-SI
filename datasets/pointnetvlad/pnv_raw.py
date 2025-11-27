@@ -17,33 +17,7 @@ from datasets.spherical_coords import SphericalCoords
 from datasets.base_datasets import PointCloudLoader
 
 class PNVPointCloudLoader(PointCloudLoader):
-    def global_normalize(self, pcd):
-        """
-        Normalize a pointcloud to achieve mean zero, scaled between [-1, 1] and with a fixed number of points
-        """
-        pcd = copy.deepcopy(pcd)
-        points = np.asarray(pcd.points)
-        [x, y, z] = points[:, 0], points[:, 1], points[:, 2]
-        x_mean = np.mean(x)
-        y_mean = np.mean(y)
-        z_mean = np.mean(z)
-
-        x = x - x_mean
-        y = y - y_mean
-        z = z - z_mean
-
-        x = x / 50.0
-        y = y / 50.0
-        z = z / 50.0
-
-        points[:, 0] = x
-        points[:, 1] = y
-        points[:, 2] = z
-
-        return points
-    
     def set_properties(self):
-        # Point clouds are already preprocessed with a ground plane removed
         self.remove_zero_points = False
         self.remove_ground_plane = False
         self.ground_plane_level = None
