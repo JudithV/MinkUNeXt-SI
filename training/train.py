@@ -16,7 +16,6 @@ from trainer import *
 from model.minkunext import model
 from losses.truncated_smoothap import TruncatedSmoothAP
 import time
-from early_stopping import EarlyStopping
 import matplotlib.pyplot as plt
 
 def get_datetime():
@@ -92,30 +91,13 @@ def do_train(model):
     ###########################################################################
     # Manual seeds...  
 
-    # Establecer la semilla para PyTorch
     torch.manual_seed(42)
-
-    # Si estás usando un GPU, también necesitas establecer la semilla para el backend CUDA
     torch.cuda.manual_seed(42)
     np.random.seed(42)
     random.seed(42)
-
-    # Save seeds...
-    # Obtener la semilla actual de PyTorch
-    """torch_seed = torch.initial_seed()
-
-    # Obtener la semilla de Python
-    python_seed = random.getstate()
-
-    # Obtener la semilla de NumPy
-    numpy_seed = np.random.get_state()
-    with open("seeds.txt", 'a') as f:
-        line = model_name + ", Torch seed: " + str(torch_seed) +", Python: " + str(python_seed[1][0]) + ", Numpy: " + str(numpy_seed[1][0])
-        f.write(line)"""
         
     # Training statistics
     stats = {'train': [], 'eval': []}
-    early_stopping = EarlyStopping(patience=PARAMS.patience, min_delta=PARAMS.min_delta, restore_best_weights=True)
 
     if 'val' in dataloaders:
         # Validation phase
@@ -191,10 +173,6 @@ def do_train(model):
         wandb.log(metrics)
         if epoch_stats['global']['recall'][1] == 1.0:
             break
-        # Verificar early stopping
-        """if early_stopping(model, epoch_stats['global']['recall'][1]):
-            print("Early stopping...")
-            break"""
         if scheduler is not None:
             scheduler.step()
 
